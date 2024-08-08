@@ -5,9 +5,14 @@
 
 const char* VERSION = "1.0";
 
-bool checkIfPrivileged() {
+void displayHelp() {
+	std::cout << "Usage: vgctl <option>\nOptions:\n  -e: enable Vanguard\n  -d: disable Vanguard\n  -k: kill Vanguard";
+	exit(0);
+}
+
+void checkIfPrivileged() {
 	HANDLE tokenHandle;
-	TOKEN_ELEVATION elevation;
+	TOKEN_ELEVATION elevation{};
 	DWORD dwSize;
 
 	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &tokenHandle)) {
@@ -22,68 +27,86 @@ bool checkIfPrivileged() {
 
 	CloseHandle(tokenHandle);
 
-	return elevation.TokenIsElevated;
+	if (!elevation.TokenIsElevated) {
+		std::cout << "You need to run vgctl as administrator.\n";
+		exit(1);
+	};
 }
 
+// TODO: move this to a separate file 
 void printVanguardInfo(Vanguard::Vanguard* vg) {
 	const char* status;
 	const char* config;
 
-	switch (vg->status) {
-	case Vanguard::Status::Running:
+	if (vg->isRunning) {
 		status = "Vanguard is currently running.";
-		break;
-
-	case Vanguard::Status::Stopped:
+	}
+	else {
 		status = "Vanguard is currently stopped.";
-		break;
-
-	default:
-		status = "Vanguard's status is unknown.";
-		break;
 	};
 
-	switch (vg->config) {
-	case Vanguard::Config::Enabled:
+	if (vg->isEnabled) {
 		config = "Vanguard will start on next boot.";
-		break;
-
-	case Vanguard::Config::Disabled:
+	}
+	else {
 		config = "Vanguard will not start on next boot.";
-		break;
-
-	default:
-		config = "Vanguard's boot configuration is unknown.";
-	};
+	}
 
 	std::cout << status << "\n";
 	std::cout << config << "\n";
-}
+};
 
-int main() {
-	std::cout << "vgctl version " << VERSION << "\n";
+int main(int argc, char** argv) {
+	if (argc == 1) {
+		displayHelp();
+		exit(0);
+	};
 
-	if (!checkIfPrivileged()) {
-		std::cout << "You need to run vgctl as administrator." << "\n";
-		exit(1);
-	}
+	checkIfPrivileged();
 
 	std::cout << "Connecting to the service manager... ";
 	SC_HANDLE serviceManager = OpenSCManagerA(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 	if (!serviceManager) {
-		// TODO: maybe relaunch the program and ask for elevated privileges?
 		std::cout << "Connection failed. Error: " << GetLastError();
 		exit(1);
 	}
 	std::cout << "Connected.\n";
 
-	Vanguard::Vanguard* vg = new Vanguard::Vanguard(serviceManager);
-
 	std::cout << "Querying the Vanguard driver's status and config...\n";
-	vg->getVanguardStatus();
-	vg->getVanguardConfig();
+	Vanguard::Vanguard vg(serviceManager);
 
-	printVanguardInfo(vg);
+	for (int i = 0; i < argc; i++) {
+		std::string arg = argv[i];
+
+		if (arg == "-e") {
+			std::cout << "Enabling Vanguard...\n";
+			if (!vg.enable()) {
+				std::cout << "Failed to enable Vanguard. Try to enable it manually.\n";
+				exit(1);
+			}
+
+			std::cout << "Vanguard has been enabled. You need to restart your computer.";
+			exit(0);
+		}
+
+		if (arg == "-d") {
+			if (!vg.disable()) {
+				std::cout << "Failed to disable Vanguard. Try to disable it manually.\n";
+				exit(1);
+			};
+
+			std::cout << "Vanguard has been disabled.";
+			exit(0);
+		}
+
+		if (arg == "-k") {
+			if (!vg.kill()) {
+				std::cout << "Failed to kill Vanguard. Try to kill it manually through the system tray icon.\n";
+				exit(1);
+			}
+			exit(0);
+		}
+	}
 
 	CloseServiceHandle(serviceManager);
 
