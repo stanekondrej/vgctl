@@ -4,7 +4,7 @@
 #include "Vanguard.h"
 
 void displayHelp() {
-	std::cout << "Usage: vgctl <option>\nOptions:\n  -e: enable Vanguard\n  -d: disable Vanguard\n  -k: kill Vanguard";
+	std::cout << "Usage: vgctl <option>\nOptions:\n  -e: enable Vanguard\n  -d: disable Vanguard\n  -k: kill Vanguard (only the user-mode process)";
 	exit(0);
 }
 

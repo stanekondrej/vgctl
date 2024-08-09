@@ -5,6 +5,9 @@
 
 namespace Vanguard {
 	Vanguard::Vanguard(SC_HANDLE hServiceManager) {
+		this->hService = NULL;
+		this->hProcess = NULL;
+
 		this->config = NULL;
 
 		this->isRunning = true;
@@ -20,10 +23,12 @@ namespace Vanguard {
 
 		this->getVanguardStatus();
 		this->getVanguardConfig();
+		this->getVanguardUserModeProcess();
 	}
 
 	Vanguard::~Vanguard() {
 		CloseServiceHandle(this->hService);
+		CloseHandle(this->hProcess);
 		free(this->config);
 	}
 
@@ -87,6 +92,19 @@ namespace Vanguard {
 		}
 	}
 
+	void Vanguard::getVanguardUserModeProcess() {
+		return; //TODO remove this
+		const int ID = 0; //TODO REPLACE THIS, THIS IS A STUB AND NOT THE REAL ID OF THE PROCESS.
+
+		HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, false, ID);
+		if (!hProcess) {
+			std::cout << "Failed to find the user-mode Vanguard process.\n";
+			exit(1);
+		}
+
+		this->hProcess = hProcess;
+	}
+
 	bool Vanguard::changeVanguardConfig(unsigned int startType) {
 		if (!ChangeServiceConfigA(
 			this->hService, SERVICE_NO_CHANGE, startType, SERVICE_NO_CHANGE, NULL, NULL, NULL, NULL, NULL, NULL, NULL
@@ -98,6 +116,8 @@ namespace Vanguard {
 
 		return true;
 	};
+
+	bool Vanguard::update() {}
 
 	bool Vanguard::enable() {
 		const unsigned int START_TYPE = SERVICE_SYSTEM_START;
@@ -132,8 +152,6 @@ namespace Vanguard {
 	};
 
 	bool Vanguard::kill() {
-		//TODO: implement
-
-		return false;
+		return TerminateProcess(this->hProcess, 0); // TODO: is this really the right exit code?
 	};
 }
