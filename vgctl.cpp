@@ -52,8 +52,8 @@ void runAsAdministrator(int argc, char** argv) {
 
 // TODO: move this to a separate file 
 void printVanguardInfo(Vanguard::Vanguard* vg) {
-	const char* status;
-	const char* config;
+	std::string status;
+	std::string config;
 
 	if (vg->isRunning) {
 		status = "Vanguard is currently running.";

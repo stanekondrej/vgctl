@@ -23,3 +23,12 @@ not been implemented yet.
 
 Install Visual Studio, specifically the package for desktop C/C++ development. Then, compile the project
 with MSVC++. Pretty simple and straight forward.
+
+## Goals
+
+These are some of the future goals I want to achieve in this project:
+
+- [ ] Write CI/CD things (e.g. GH actions, tests...)
+- [ ] Implement the Vanguard kill functionality
+- [x] Make vgctl open its own console window
+- [x] Make vgctl ask for elevated privileges
