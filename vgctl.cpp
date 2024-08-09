@@ -10,7 +10,7 @@ void displayHelp() {
 	exit(0);
 }
 
-void checkIfPrivileged() {
+bool checkIfPrivileged() {
 	HANDLE tokenHandle;
 	TOKEN_ELEVATION elevation{};
 	DWORD dwSize;
@@ -27,10 +27,27 @@ void checkIfPrivileged() {
 
 	CloseHandle(tokenHandle);
 
-	if (!elevation.TokenIsElevated) {
-		std::cout << "You need to run vgctl as administrator.\n";
+	return elevation.TokenIsElevated;
+}
+
+void runAsAdministrator(int argc, char** argv) {
+	const std::string PATH_TO_CMD = "C:\\Windows\\system32\\cmd.exe";
+	std::string arg = "/K"; // /K is a parameter that specifies that the console windows should remain after the app exits
+
+	for (int i = 0; i < argc; i++) {
+		arg += argv[i];
+		if (i < argc) {
+			arg += " ";
+		}
+	};
+
+	HINSTANCE instance = ShellExecuteA(NULL, "runas", PATH_TO_CMD.data(), arg.data(), NULL, SW_SHOWNORMAL);
+	if ((INT_PTR)instance <= 32) { // if the function returns >32, it succeeded
+		std::cout << "Elevating privileges failed. Error: " << GetLastError() << "\n";
 		exit(1);
 	};
+
+	exit(0);
 }
 
 // TODO: move this to a separate file 
@@ -62,7 +79,9 @@ int main(int argc, char** argv) {
 		exit(0);
 	};
 
-	checkIfPrivileged();
+	if (!checkIfPrivileged()) {
+		runAsAdministrator(argc, argv);
+	};
 
 	std::cout << "Connecting to the service manager... ";
 	SC_HANDLE serviceManager = OpenSCManagerA(NULL, NULL, SC_MANAGER_ALL_ACCESS);
