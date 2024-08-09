@@ -1,4 +1,5 @@
-# vgctl
+# vgctl [![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fstanekondrej%2Fvgctl&count_bg=%232600FF&title_bg=%23000000&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=true)](https://hits.seeyoufarm.com)
+
 
 vgctl is a utility to enable/disable the Riot Vanguard anticheat kernel space driver.
 
@@ -19,16 +20,21 @@ the executable, and run it with one of the flags:
 - ~~`-k`: kill Riot Vanguard (only kills the process, Vanguard will start on next boot)~~ this has
 not been implemented yet.
 
+## Getting vgctl
+
+Download the binary from GitHub releases, or build from source (see [Building](#building)).
+
 ## Building
 
-Install Visual Studio, specifically the package for desktop C/C++ development. Then, compile the project
-with MSVC++. Pretty simple and straight forward.
+You can build just like you would regularly using CMake. Then, either execute vgctl directly,
+or add it to your PATH. Don't bother trying to build this on something other than Windows, because
+vgctl needs the Windows APIs to build, and obviously to function.
 
 ## Goals
 
 These are some of the future goals I want to achieve in this project:
 
-- [ ] Write CI/CD things (e.g. GH actions, tests...)
 - [ ] Implement the Vanguard kill functionality
+- [x] Write CI/CD things (e.g. GH actions, tests...)
 - [x] Make vgctl open its own console window
 - [x] Make vgctl ask for elevated privileges
