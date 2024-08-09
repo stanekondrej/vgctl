@@ -22,7 +22,15 @@ not been implemented yet.
 
 ## Getting vgctl
 
-Download the binary from GitHub releases, or build from source (see [Building](#building)).
+You can get the binary a few different ways. The following ways are ordered from most stable 
+to least stable:
+
+- Download the binary from GitHub releases 
+- Download an artifact from GitHub actions 
+- Build from source (see [Building](#building))
+
+Building from source is similar to downloading the artifact from Actions, except the build has 
+the possibility to fail if the Action has failed as well.
 
 ## Building
 

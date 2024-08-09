@@ -21,9 +21,23 @@ namespace Vanguard {
 
 		this->hService = hService;
 
-		this->getVanguardStatus();
-		this->getVanguardConfig();
-		this->getVanguardUserModeProcess();
+		if (!this->getVanguardStatus()) {
+			std::cout << "Getting Vanguard kernel driver's status failed.\n";
+			exit(1);
+		};
+
+		if (!this->getVanguardConfig()) {
+			std::cout << "Getting Vanguard kernel driver's startup configuration failed.\n";
+			exit(1);
+		};
+
+		/*
+		THIS HAS NOT BEEN IMPLEMENTED YET
+
+		if (!this->getVanguardUserModeProcess()) {
+			std::cout << "Could not find the Vanguard user mode process. This isn't a bad thing or a bug, it might just not be running.\n";
+		};
+		*/
 	}
 
 	Vanguard::~Vanguard() {
@@ -33,13 +47,13 @@ namespace Vanguard {
 	}
 
 	//TODO change this return type to bool
-	void Vanguard::getVanguardStatus() {
+	bool Vanguard::getVanguardStatus() {
 		SERVICE_STATUS_PROCESS status;
 		DWORD bytesNeeded;
 
 		if (!QueryServiceStatusEx(this->hService, SC_STATUS_PROCESS_INFO, (LPBYTE) &status, sizeof(status), &bytesNeeded)) {
 			std::cout << "Getting Vanguard driver status failed. Error: " << GetLastError();
-			exit(1);
+			return false;
 		};
 
 		switch (status.dwCurrentState) {
@@ -53,28 +67,31 @@ namespace Vanguard {
 
 		default:
 			std::cout << "Vanguard is in an unknown state.\n";
-			exit(1);
+			false;
 		};
+
+		return true;
 	}
 
 	//TODO change this return type to bool
-	void Vanguard::getVanguardConfig() {
+	bool Vanguard::getVanguardConfig() {
 		DWORD dwBytesNeeded;
 
 		(void)QueryServiceConfigA(this->hService, NULL, 0, &dwBytesNeeded); // we can skip checking the return value, this call is meant to fail
 		if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
 			std::cout << "Querying Vanguard's service config failed. Error: " << GetLastError();
-			exit(1);
+			return false;
 		};
 
 		QUERY_SERVICE_CONFIGA* config = (QUERY_SERVICE_CONFIGA*)malloc(dwBytesNeeded);
 		if (!config) {
 			std::cout << "You probably don't have enough free memory on your computer.";
-			exit(1);
+			return false;
 		};
 
 		if (!QueryServiceConfigA(this->hService, config, dwBytesNeeded, &dwBytesNeeded)) {
 			std::cout << "Querying Vanguard's service config failed. Error: " << GetLastError();
+			return false;
 		};
 
 		this->config = config;
@@ -90,22 +107,26 @@ namespace Vanguard {
 
 		default:
 			std::cout << "The Vanguard kernel driver is in an unknown state. Vanguard is either not installed, or this is a bug.\n";
-			exit(1);
+			return false;
 		}
+
+		return true;
 	}
 
 	// TODO change this return type to bool
-	void Vanguard::getVanguardUserModeProcess() {
-		return; //TODO remove this
+	bool Vanguard::getVanguardUserModeProcess() {
+		return false; //TODO remove this
 		const int ID = 0; //TODO REPLACE THIS, THIS IS A STUB AND NOT THE REAL ID OF THE PROCESS.
 
 		HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, false, ID);
 		if (!hProcess) {
 			std::cout << "The Vanguard user mode process could not be found.\n";
-			return;
+			return false;
 		}
 
 		this->hProcess = hProcess;
+
+		return true;
 	}
 
 	bool Vanguard::changeVanguardConfig(unsigned int startType) {

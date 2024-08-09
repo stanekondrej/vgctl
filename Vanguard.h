@@ -10,9 +10,9 @@ namespace Vanguard {
 
 		QUERY_SERVICE_CONFIGA* config;
 
-		void getVanguardStatus();
-		void getVanguardConfig();
-		void getVanguardUserModeProcess();
+		bool getVanguardStatus();
+		bool getVanguardConfig();
+		bool getVanguardUserModeProcess();
 		bool changeVanguardConfig(unsigned int startType);
 
 	public:
