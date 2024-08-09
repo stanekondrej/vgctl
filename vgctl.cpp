@@ -3,8 +3,6 @@
 
 #include "Vanguard.h"
 
-const char* VERSION = "1.0";
-
 void displayHelp() {
 	std::cout << "Usage: vgctl <option>\nOptions:\n  -e: enable Vanguard\n  -d: disable Vanguard\n  -k: kill Vanguard";
 	exit(0);
@@ -50,7 +48,6 @@ void runAsAdministrator(int argc, char** argv) {
 	exit(0);
 }
 
-// TODO: move this to a separate file 
 void printVanguardInfo(Vanguard::Vanguard* vg) {
 	std::string status;
 	std::string config;
