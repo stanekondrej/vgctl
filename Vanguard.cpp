@@ -32,6 +32,7 @@ namespace Vanguard {
 		free(this->config);
 	}
 
+	//TODO change this return type to bool
 	void Vanguard::getVanguardStatus() {
 		SERVICE_STATUS_PROCESS status;
 		DWORD bytesNeeded;
@@ -56,6 +57,7 @@ namespace Vanguard {
 		};
 	}
 
+	//TODO change this return type to bool
 	void Vanguard::getVanguardConfig() {
 		DWORD dwBytesNeeded;
 
@@ -92,14 +94,15 @@ namespace Vanguard {
 		}
 	}
 
+	// TODO change this return type to bool
 	void Vanguard::getVanguardUserModeProcess() {
 		return; //TODO remove this
 		const int ID = 0; //TODO REPLACE THIS, THIS IS A STUB AND NOT THE REAL ID OF THE PROCESS.
 
 		HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, false, ID);
 		if (!hProcess) {
-			std::cout << "Failed to find the user-mode Vanguard process.\n";
-			exit(1);
+			std::cout << "The Vanguard user mode process could not be found.\n";
+			return;
 		}
 
 		this->hProcess = hProcess;
@@ -117,7 +120,13 @@ namespace Vanguard {
 		return true;
 	};
 
-	bool Vanguard::update() {}
+	bool Vanguard::update() {
+		this->getVanguardStatus();
+		this->getVanguardConfig();
+		this->getVanguardUserModeProcess();
+
+		return true;
+	}
 
 	bool Vanguard::enable() {
 		const unsigned int START_TYPE = SERVICE_SYSTEM_START;
